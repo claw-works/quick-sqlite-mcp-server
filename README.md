@@ -1,6 +1,8 @@
 # quick-sqlite-mcp-server
 
-A SQLite MCP (Model Context Protocol) server for **Amazon Q Developer** and other MCP-compatible AI tools. Runs as a Docker container with your database files mounted in — no SQLite bindings needed in the client.
+A SQLite MCP (Model Context Protocol) server for **[Amazon Quick](https://docs.aws.amazon.com/quick/latest/userguide/amazon-quick-desktop.html)** (desktop) and other MCP-compatible AI tools. Runs as a Docker container with your database files mounted in — no SQLite bindings needed in the client.
+
+> **What is Amazon Quick?** Amazon Quick is a native desktop AI assistant for macOS and Windows that supports MCP servers as custom tool integrations. This server gives Quick the ability to read and write SQLite databases directly from chat.
 
 ## Features
 
@@ -19,9 +21,20 @@ docker run --rm -i \
   ghcr.io/claw-works/quick-sqlite-mcp-server
 ```
 
-## Amazon Q Developer Configuration
+## Amazon Quick Configuration
 
-Add to your MCP settings (`.amazonq/mcp.json` or via Q Developer UI):
+Amazon Quick uses a UI-based MCP setup. Go to **Settings → Capabilities → MCP → + Add MCP** and choose **Local**:
+
+| Field | Value |
+|-------|-------|
+| Name | `SQLite` |
+| Command | `docker` |
+| Arguments | `run --rm -i -v /your/data:/data -e ROOT_DIR=/data ghcr.io/claw-works/quick-sqlite-mcp-server` |
+| Description | `Read and write SQLite databases. Supports multiple databases, transactions, and schema inspection.` |
+
+> Replace `/your/data` with the directory containing your `.db` files.
+
+Alternatively, if you prefer a config file (e.g. for Kiro or Claude Code import), use:
 
 ```json
 {
@@ -39,7 +52,7 @@ Add to your MCP settings (`.amazonq/mcp.json` or via Q Developer UI):
 }
 ```
 
-> **Tip**: Replace `/your/data` with the directory containing your `.db` files.
+Quick can import this format via **+ Add MCP → Import** by pointing to the config file path.
 
 ## Environment Variables
 
@@ -175,7 +188,7 @@ Roll back an active transaction.
 ## Building Locally
 
 ```bash
-# Requires Go 1.22+ and gcc (for CGO/sqlite3)
+# Requires Go 1.23+ and gcc (for CGO/sqlite3)
 go build -o quick-sqlite-mcp-server .
 
 # Or with Docker
