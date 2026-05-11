@@ -50,14 +50,14 @@ func (r *Registry) add(def mcp.ToolDef, handler func(json.RawMessage) (interface
 // dbParam is the common "db" property definition.
 var dbParam = mcp.Property{
 	Type:        "string",
-	Description: `Path to the SQLite database file. Use a relative path (e.g. "myapp.db" or "subdir/data.db") to resolve against ROOT_DIR, or an absolute path if ALLOW_ABSOLUTE_PATH=true.`,
+	Description: `Path to the SQLite database file. Use a relative path (e.g. "myapp.db" or "subdir/data.db") to resolve against ROOT_DIR, or an absolute path if ALLOW_ABSOLUTE_PATH=true. If the file does not exist, it will be created automatically.`,
 }
 
 func (r *Registry) register() {
 	// ── sqlite_query ──────────────────────────────────────────────────────────
 	r.add(mcp.ToolDef{
 		Name:        "sqlite_query",
-		Description: "Execute a SELECT statement against a SQLite database and return the results as a JSON array of row objects. Use this for all read-only queries. Supports parameterized queries to prevent SQL injection.",
+		Description: "Execute a SELECT statement against a SQLite database and return the results as a JSON array of row objects. Use this for all read-only queries. Supports parameterized queries to prevent SQL injection. The database file is created automatically if it does not exist.",
 		InputSchema: mcp.InputSchema{
 			Type: "object",
 			Properties: map[string]mcp.Property{
@@ -72,7 +72,7 @@ func (r *Registry) register() {
 	// ── sqlite_execute ────────────────────────────────────────────────────────
 	r.add(mcp.ToolDef{
 		Name:        "sqlite_execute",
-		Description: "Execute a single INSERT, UPDATE, or DELETE statement against a SQLite database. Returns the number of rows affected and the last inserted row ID (for INSERT). Supports parameterized queries.",
+		Description: "Execute a single INSERT, UPDATE, or DELETE statement against a SQLite database. Returns the number of rows affected and the last inserted row ID (for INSERT). Supports parameterized queries. The database file is created automatically if it does not exist.",
 		InputSchema: mcp.InputSchema{
 			Type: "object",
 			Properties: map[string]mcp.Property{
@@ -87,7 +87,7 @@ func (r *Registry) register() {
 	// ── sqlite_execute_batch ──────────────────────────────────────────────────
 	r.add(mcp.ToolDef{
 		Name:        "sqlite_execute_batch",
-		Description: "Execute multiple SQL statements in a single atomic transaction. Ideal for schema migrations, table creation, or bulk inserts. If any statement fails, all changes are rolled back automatically.",
+		Description: "Execute multiple SQL statements in a single atomic transaction. Ideal for creating a new database schema, running migrations, or bulk inserts. The database file is created automatically if it does not exist. If any statement fails, all changes are rolled back automatically.",
 		InputSchema: mcp.InputSchema{
 			Type: "object",
 			Properties: map[string]mcp.Property{
@@ -128,7 +128,7 @@ func (r *Registry) register() {
 	// ── sqlite_begin_transaction ──────────────────────────────────────────────
 	r.add(mcp.ToolDef{
 		Name:        "sqlite_begin_transaction",
-		Description: "Begin an explicit database transaction. Returns a tx_id that must be passed to sqlite_commit or sqlite_rollback. Use this when you need to execute multiple statements atomically. Transactions expire automatically after 5 minutes of inactivity.",
+		Description: "Begin an explicit database transaction. Returns a tx_id that must be passed to sqlite_commit or sqlite_rollback. Use this when you need to execute multiple write statements atomically across separate tool calls. Transactions expire automatically after 5 minutes of inactivity. The database file is created automatically if it does not exist.",
 		InputSchema: mcp.InputSchema{
 			Type: "object",
 			Properties: map[string]mcp.Property{
